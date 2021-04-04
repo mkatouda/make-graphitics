@@ -29,3 +29,5 @@ name = "GO_sheet"
 output = mg.Writer(sheet, name)
 output.write_xyz(name + ".xyz")
 output.write_lammps(name + ".data")
+output.write_pdb(name + ".pdb", "GO")
+output.write_gromacs(name + ".gro", name + ".itp", "GO")

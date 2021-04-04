@@ -37,6 +37,7 @@ class OPLS_Reader(object):
         self.vdw_type["type"] += [int(line[15:20])]
         self.mass["a"] += [int(line[12:15])]
         self.mass["m"] += [float(line[65:72])]
+        self.mass["l"] += [line[21:28].strip()]
 
     def add_pair(self, line):
         line = line.split()
@@ -104,7 +105,7 @@ class OPLS_Reader(object):
         }
         self.improper = {"a1": [], "a2": [], "centre": [], "a3": [], "k": [], "r": []}
         self.charge = {"a": [], "q": []}
-        self.mass = {"a": [], "m": []}
+        self.mass = {"a": [], "m": [], "l": []}
 
 
 # a = OPLS_Reader(sys.argv[1])

@@ -31,3 +31,5 @@ name = "graphite"
 output = mg.Writer(graphite, name)
 output.write_xyz(name + ".xyz")
 output.write_lammps(name + ".data")
+output.write_pdb(name + ".pdb", "GRA")
+output.write_gromacs(name + ".gro", name + ".itp", "GRA")

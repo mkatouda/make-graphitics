@@ -22,7 +22,9 @@ vdw_defs = {1: 90}
 
 mg.Parameterise(graphene, vdw_defs)
 
-name = "graphene"
+name = "graphene_sheet"
 output = mg.Writer(graphene, name)
 output.write_xyz(name + ".xyz")
 output.write_lammps(name + ".data")
+output.write_pdb(name + ".pdb", "GRA")
+output.write_gromacs(name + ".gro", name + ".itp", "GRA")

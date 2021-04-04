@@ -71,7 +71,9 @@ class Parameterise(object):
                 atom_data = mass_data["a"][j]
                 if self.vdw_defs[label] == atom_data:
                     found += 1
-                    mass_coeffs[label] = mass_data["m"][j]
+                    mass_coeffs[label] = {}
+                    mass_coeffs[label][1] = mass_data["m"][j]
+                    mass_coeffs[label][2] = mass_data["l"][j]
             if found != 1:
                 raise ValueError("WRONG", label, "\t found ", found, " entries")
         return mass_coeffs
