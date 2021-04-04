@@ -10,7 +10,7 @@ flake = oxidiser.react(flake)
 
 mg.Parameterise(flake, flake.vdw_defs)
 
-name = "GO_rest"
+name = "GO_rect"
 output = mg.Writer(flake, name)
 output.write_xyz(name + ".xyz")
 output.write_lammps(name + ".data")
