@@ -11,7 +11,9 @@ Available structures:
 
 Output:
 - .xyz 
+- .pdb
 - lammps data file
+- gromacs gro file and ito file
 
 Automatically parameterise by forcefields:
 - OPLS
