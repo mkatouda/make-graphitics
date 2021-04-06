@@ -436,10 +436,12 @@ class Writer(object):
                 "[ atomtypes ]\n"
                 + ";name   bond_type     mass     charge   ptype   sigma         epsilon       Amb\n"
             )
-            for i in self.pair_coeffs:
+            dicts = {d[2]: [k, d[1]] for k, d in self.masses.items()}
+            masses = {l: {1: m, 2: k} for k, [l, m] in dicts.items()}
+            for i in masses:
                 outfile.write(
                     "{:<8} {:<11} {:>8.5f} {:>8.5f} {:>5} {:>13.5e} {:>13.5e}\n"
-                    .format(self.masses[i][2], self.masses[i][2], 0.0, 0.0, 'A',
+                    .format(masses[i][2], masses[i][2], 0.0, 0.0, 'A',
                             0.1*self.pair_coeffs[i][2], 4.184*self.pair_coeffs[i][1])
                 )
             outfile.write("\n")
@@ -533,6 +535,202 @@ class Writer(object):
                             self.improper_coeffs[j][2], 8.368*self.improper_coeffs[j][1]
                             )
                 )
+
+            print "Coords written to   " + gro_filename
+            print "Topology written to " + itp_filename
+
+    def write_gromacs_charmm(self, gro_filename="gromacs.gro", itp_filename="gromacs.itp", resname="GRA"):
+
+        """
+        # all OPLS atom types that are introduced by oxidation
+        sim.vdw_defs = {
+            1: 90,  # Cg, graphitic (aromatic)
+            2: 91,  # Hg, graphitic edge
+            3: 101,  # Ct, tertiary C-OH (Alcohol R3COH)
+            4: 96,  # Oa, C-OH (Alcohol -OH)
+            5: 97,  # Ha, C-OH (Alcohol -OH)
+            6: 122,  # Oe, epoxy (Dialkyl Ether -O-)
+            11: 108,  # Cb, Benzyl (Phenol C-OH)
+            7: 109,  # Oa, C-OH (Phenol -OH)
+            8: 209,  # Cc, Carboxylic carbon (Carboxylic Acid -COOH)
+            9: 210,  # Oc, Ketone oxygen (Carboxylic Acid C=O)
+            10: 211,  # Oa, alcohol (Carboxylic Acid -OH)
+            12: 213, # C, carboxylate -COO (Carboxylate COO-)
+            13: 214, # O, carboxylate -COO (Carboxylate COO-)
+            14: 101, # Ct, tertiary C-OH (Alcohol R3COH)
+            349: 349, # Na+
+            354: 354, # Ca 2+ 
+        }  # OPLS definitions
+        masses = {1:   {1: 12.011, 2: 'CA'},
+                  2:   {1: 1.008,  2: 'HA'},
+                  3:   {1: 12.011, 2: 'CT'},
+                  4:   {1: 15.999, 2: 'OH'},
+                  5:   {1: 1.008,  2: 'HO'},
+                  6:   {1: 15.999, 2: 'OS'},
+                  7:   {1: 15.999, 2: 'OH'},
+                  8:   {1: 12.011, 2: 'C'},
+                  9:   {1: 15.999, 2: 'O'},
+                  10:  {1: 15.999, 2: 'OH'},
+                  11:  {1: 12.011, 2: 'CA'},
+                  12:  {1: 12.011, 2: 'C'},
+                  13:  {1: 15.999, 2: 'O2'}
+                  14:  {1: 12.011, 2: 'CT'},
+                  349: {1: 22.99,  2: 'Na'},
+                  354: {1: 40.08,  2: 'Ca'}}
+        """
+        # CGenFF definitions (parameter from DOI: 10.1016/j.commatsci.2015.12.030)
+        masses = {1:   {1: 12.011, 2: 'CGOA'},
+                  2:   {1: 1.008,  2: 'HGOA'},
+                  3:   {1: 12.011, 2: 'CGOOH'},
+                  4:   {1: 15.999, 2: 'OGOOH'},
+                  5:   {1: 1.008,  2: 'HGOOH'},
+                  6:   {1: 15.999, 2: 'OGOEPO'},
+                  7:   {1: 15.999, 2: 'OGOPOH'},
+                  8:   {1: 12.011, 2: 'CGOCA'},
+                  9:   {1: 15.999, 2: 'OGOCA2'},
+                  10:  {1: 15.999, 2: 'OGOCA1'},
+                  11:  {1: 12.011, 2: 'CGOPOH'},
+                  12:  {1: 12.011, 2: 'CGOCB'},
+                  13:  {1: 15.999, 2: 'OGOCB'},
+                  14:  {1: 12.011, 2: 'CGOEPO'},
+                  349: {1: 22.99,  2: 'SOD'},
+                  354: {1: 40.08,  2: 'CAL'}}
+        
+        with open(gro_filename, "w") as outfile:
+            outfile.write(self.system_name + "\n")
+            outfile.write(str(len(self.coords)) + "\n")
+            for i in range(len(self.coords)):
+                j = self.atom_labels[i]
+                if hasattr(self, "masses"):
+                    try:
+                        mass = self.masses[j][1]
+                    except KeyError:
+                        mass = 100
+                    if abs(mass - 12.0) < 0.5:
+                        atom_label = "C"
+                    elif abs(mass - 1.0) < 0.5:
+                        atom_label = "H"
+                    elif abs(mass - 14.0) < 0.5:
+                        atom_label = "N"
+                    elif abs(mass - 16.0) < 0.5:
+                        atom_label = "O"
+                    elif abs(mass - 22.9) < 0.5:
+                        atom_label = "Na"
+                    elif abs(mass - 40.1) < 0.5:
+                        atom_label = "Ca"
+                    else:
+                        atom_label = str(j)
+                else:
+                    atom_label = str(j)
+
+                outfile.write(
+                    "{:>5}{:<5}{:<5}{:>5}{:>8.3f}{:>8.3f}{:>8.3f}\n"
+                    .format(1, resname, atom_label, i + 1,
+                            0.1*self.coords[i][0], 0.1*self.coords[i][1], 0.1*self.coords[i][2])
+                )
+            outfile.write(
+                    "{:>11.5f}{:>11.5f}{:>11.5f}\n".format(
+                        0.1*(self.box_dimensions[0, 1] - self.box_dimensions[0, 0]),
+                        0.1*(self.box_dimensions[1, 1] - self.box_dimensions[1, 0]),
+                        0.1*(self.box_dimensions[2, 1] - self.box_dimensions[2, 0])
+                        )
+            )
+
+        with open(itp_filename, "w") as outfile:
+            outfile.write(
+                "; "
+                + self.system_name
+                + "\n\n"
+            )
+            outfile.write(
+                "[ moleculetype ]\n"
+                + "; name  nrexcl\n"
+                + resname + "     1\n"
+            )
+            outfile.write("\n")
+            outfile.write(
+                "[ atoms ]\n"
+                + ";   nr  type  resi  res  atom  cgnr     charge      mass       ; qtot   bond_type\n"
+            )
+            qtot = 0.0
+            for i in range(len(self.coords)):
+                j = self.atom_labels[i]
+                if hasattr(self, "masses"):
+                    try:
+                        mass = self.masses[j][1]
+                    except KeyError:
+                        mass = 100
+                    if abs(mass - 12.0) < 0.5:
+                        atom_label = "C"
+                    elif abs(mass - 1.0) < 0.5:
+                        atom_label = "H"
+                    elif abs(mass - 14.0) < 0.5:
+                        atom_label = "N"
+                    elif abs(mass - 16.0) < 0.5:
+                        atom_label = "O"
+                    elif abs(mass - 22.9) < 0.5:
+                        atom_label = "Na"
+                    elif abs(mass - 40.1) < 0.5:
+                        atom_label = "Ca"
+                    else:
+                        atom_label = str(j)
+                else:
+                    atom_label = str(j)
+
+                qtot += self.charges[i]
+                outfile.write("{:>6} {:>6} {:>5} {:>5} {:>5} {:>4} {:>12.6f} {:>12.5f} ; qtot {:>6.3f}\n"
+                    .format(i + 1, masses[j][2], self.molecule[i], resname, atom_label,
+                            i + 1, self.charges[i], self.masses[j][1], qtot)
+                )
+                #outfile.write("{:>6} {:>6} {:>5} {:>5} {:>5} {:>4} {:>12.6f} {:>12.5f} ; qtot {:>6.3f}\n"
+                #    .format(i + 1, self.masses[j][2], self.molecule[i], resname, atom_label,
+                #            i + 1, self.charges[i], self.masses[j][1], qtot)
+                #)
+            outfile.write("\n")
+            outfile.write(
+                "[ bonds ]\n"
+                + ";   ai     aj funct   r             k\n"
+            )
+            for i in range(len(self.bonds)):
+                j = self.bond_labels[i]
+                outfile.write(
+                    "{:>6} {:>6} {:>3}\n".format(self.bonds[i][0], self.bonds[i][1], 1)
+                )
+            outfile.write("\n")
+            outfile.write(
+                "[ angles ]\n"
+                + ";   ai     aj     ak    func    theta         cth\n"
+            )
+            for i in range(len(self.angles)):
+                j = self.angle_labels[i]
+                outfile.write(
+                    "{:>6} {:>6} {:>6} {:>6}\n"
+                    .format(self.angles[i][0], self.angles[i][1], self.angles[i][2], 5)
+                )
+            outfile.write("\n")
+            outfile.write(
+                "[ dihedrals ] ; propers\n"
+                + "; ai    aj      ak      al      funct   phi0    cp      mult\n"
+            )
+            for i in range(len(self.dihedrals)):
+                j = self.dihedral_labels[i]
+                outfile.write(
+                    "{:>6} {:>6} {:>6} {:>6} {:>6}\n"
+                    .format(self.dihedrals[i][0], self.dihedrals[i][1],
+                            self.dihedrals[i][2], self.dihedrals[i][3], 9)
+                )
+            #outfile.write("\n")
+            #outfile.write(
+            #    "[ dihedrals ] ; impropers\n"
+            #    + "; ai    aj      ak      al      funct   phi0    cp      mult\n"
+            #)
+            #for i in range(len(self.impropers)):
+            #    j = self.improper_labels[i]
+            #    outfile.write(
+            #        "{:>6} {:>6} {:>6} {:>6} {:>6}\n"
+            #        .format(self.impropers[i][0], self.impropers[i][1],
+            #                self.impropers[i][2], self.impropers[i][3], 2)
+            #    )
 
             print "Coords written to   " + gro_filename
             print "Topology written to " + itp_filename

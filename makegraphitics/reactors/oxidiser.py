@@ -123,6 +123,7 @@ class Oxidiser(Reactor):
             10: 211,  # Oa, alcohol
             12: 213, # C, carboxylate -COO
             13: 214, # O, carboxylate -COO
+            14: 101, # Ct, tertiary C-OH
             349: 349, # Na+
             354: 354, # Ca 2+ 
         }  # OPLS definitions
@@ -684,8 +685,10 @@ class Oxidiser(Reactor):
         crystal.bonds = np.vstack((crystal.bonds, new_bonds))
 
     def add_epoxy(self, crystal, above, c1, c2):
-        crystal.atom_labels[c1] = 3  # 3 is epoxy carbon
-        crystal.atom_labels[c2] = 3  # 3 is epoxy carbon
+        #crystal.atom_labels[c1] = 3  # 3 is epoxy carbon
+        #crystal.atom_labels[c2] = 3  # 3 is epoxy carbon
+        crystal.atom_labels[c1] = 14  # 14 is epoxy carbon
+        crystal.atom_labels[c2] = 14  # 14 is epoxy carbon
         crystal.atom_charges[c1] = 0.2
         crystal.atom_charges[c2] = 0.2
 
