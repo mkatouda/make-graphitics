@@ -486,10 +486,13 @@ class Writer(object):
             )
             for i in range(len(self.bonds)):
                 j = self.bond_labels[i]
+                iat, jat = self.bonds[i]
+                iatl = self.atom_labels[iat-1]; jatl = self.atom_labels[jat-1]
                 outfile.write(
-                    "{:>6} {:>6} {:>3} {:>13.4e} {:>14.5e}\n".format(
-                        self.bonds[i][0], self.bonds[i][1], 1,
-                        0.1*self.bond_coeffs[j][2], 836.8*self.bond_coeffs[j][1]
+                    "{:>6} {:>6} {:>3} {:>13.4e} {:>14.5e} ; {:>6} - {:>6}\n".format(
+                        iat, jat, 1,
+                        0.1*self.bond_coeffs[j][2], 836.8*self.bond_coeffs[j][1],
+                        self.masses[iatl][2], self.masses[jatl][2]
                     )
                 )
             outfile.write("\n")
@@ -499,10 +502,13 @@ class Writer(object):
             )
             for i in range(len(self.angles)):
                 j = self.angle_labels[i]
+                iat, jat, kat = self.angles[i]
+                iatl = self.atom_labels[iat-1]; jatl = self.atom_labels[jat-1]; katl = self.atom_labels[kat-1]
                 outfile.write(
-                    "{:>6} {:>6} {:>6} {:>6} {:>13.4e} {:>14.5e}\n"
-                    .format(self.angles[i][0], self.angles[i][1], self.angles[i][2], 1,
-                            self.angle_coeffs[j][2], 8.368*self.angle_coeffs[j][1]
+                    "{:>6} {:>6} {:>6} {:>6} {:>13.4e} {:>14.5e} ; {:>6} - {:>6} - {:>6}\n"
+                    .format(iat, jat, kat, 1,
+                            self.angle_coeffs[j][2], 8.368*self.angle_coeffs[j][1],
+                            self.masses[iatl][2], self.masses[jatl][2], self.masses[katl][2]
                             )
                 )
             outfile.write("\n")
@@ -512,12 +518,16 @@ class Writer(object):
             )
             for i in range(len(self.dihedrals)):
                 j = self.dihedral_labels[i]
+                iat, jat, kat, lat = self.dihedrals[i]
+                iatl = self.atom_labels[iat-1]; jatl = self.atom_labels[jat-1];
+                katl = self.atom_labels[kat-1]; latl = self.atom_labels[lat-1]
                 outfile.write(
-                    "{:>6} {:>6} {:>6} {:>6} {:>6} {:>12.6e} {:>12.6e} {:>12.6e} {:>12.6e}\n"
-                    .format(self.dihedrals[i][0], self.dihedrals[i][1],
-                            self.dihedrals[i][2], self.dihedrals[i][3], 5,
+                    "{:>6} {:>6} {:>6} {:>6} {:>6} {:>12.6e} {:>12.6e} {:>12.6e} {:>12.6e} ; {:>6} - {:>6} - {:>6} - {:>6}\n"
+                    .format(iat, jat, kat, lat, 5,
                             4.184*self.dihedral_coeffs[j][1], 4.184*self.dihedral_coeffs[j][2],
-                            4.184*self.dihedral_coeffs[j][3], 4.184*self.dihedral_coeffs[j][4]
+                            4.184*self.dihedral_coeffs[j][3], 4.184*self.dihedral_coeffs[j][4],
+                            self.masses[iatl][2], self.masses[jatl][2],
+                            self.masses[katl][2], self.masses[latl][2]
                             )
                 )
             outfile.write("\n")
@@ -527,12 +537,15 @@ class Writer(object):
             )
             for i in range(len(self.impropers)):
                 j = self.improper_labels[i]
+                iat, jat, kat, lat = self.impropers[i]
+                iatl = self.atom_labels[iat-1]; jatl = self.atom_labels[jat-1];
+                katl = self.atom_labels[kat-1]; latl = self.atom_labels[lat-1]
                 outfile.write(
-                    "{:>6} {:>6} {:>6} {:>6} {:>6} {:>13.4e} {:>14.5e}\n"
-                    .format(
-                            self.impropers[i][0], self.impropers[i][1],
-                            self.impropers[i][2], self.impropers[i][3], 2,
-                            self.improper_coeffs[j][2], 8.368*self.improper_coeffs[j][1]
+                    "{:>6} {:>6} {:>6} {:>6} {:>6} {:>12.6e} {:>12.6e} ; {:>6} - {:>6} - {:>6} - {:>6}\n"
+                    .format(iat, jat, kat, lat, 2,
+                            self.improper_coeffs[j][2], 8.368*self.improper_coeffs[j][1],
+                            self.masses[iatl][2], self.masses[jatl][2],
+                            self.masses[katl][2], self.masses[latl][2]                           
                             )
                 )
 
@@ -692,9 +705,11 @@ class Writer(object):
                 + ";   ai     aj funct   r             k\n"
             )
             for i in range(len(self.bonds)):
-                j = self.bond_labels[i]
+                iat, jat = self.bonds[i]
+                iatl = self.atom_labels[iat-1]; jatl = self.atom_labels[jat-1]
                 outfile.write(
-                    "{:>6} {:>6} {:>3}\n".format(self.bonds[i][0], self.bonds[i][1], 1)
+                    "{:>6} {:>6} {:>3} ; {:>6} - {:>6}\n"
+                    .format(iat, jat, 1, masses[iatl][2], masses[jatl][2])
                 )
             outfile.write("\n")
             outfile.write(
@@ -702,10 +717,11 @@ class Writer(object):
                 + ";   ai     aj     ak    func    theta         cth\n"
             )
             for i in range(len(self.angles)):
-                j = self.angle_labels[i]
+                iat, jat, kat = self.angles[i]
+                iatl = self.atom_labels[iat-1]; jatl = self.atom_labels[jat-1]; katl = self.atom_labels[kat-1]
                 outfile.write(
-                    "{:>6} {:>6} {:>6} {:>6}\n"
-                    .format(self.angles[i][0], self.angles[i][1], self.angles[i][2], 5)
+                    "{:>6} {:>6} {:>6} {:>6} ; {:>6} - {:>6} - {:>6}\n"
+                    .format(iat, jat, kat, 5, masses[iatl][2], masses[jatl][2], masses[katl][2])
                 )
             outfile.write("\n")
             outfile.write(
@@ -713,11 +729,14 @@ class Writer(object):
                 + "; ai    aj      ak      al      funct   phi0    cp      mult\n"
             )
             for i in range(len(self.dihedrals)):
-                j = self.dihedral_labels[i]
+                iat, jat, kat, lat = self.dihedrals[i]
+                iatl = self.atom_labels[iat-1]; jatl = self.atom_labels[jat-1];
+                katl = self.atom_labels[kat-1]; latl = self.atom_labels[lat-1]
                 outfile.write(
-                    "{:>6} {:>6} {:>6} {:>6} {:>6}\n"
+                    "{:>6} {:>6} {:>6} {:>6} {:>6} ; {:>6} - {:>6} - {:>6} - {:>6}\n"
                     .format(self.dihedrals[i][0], self.dihedrals[i][1],
-                            self.dihedrals[i][2], self.dihedrals[i][3], 9)
+                            self.dihedrals[i][2], self.dihedrals[i][3], 9,
+                            masses[iatl][2], masses[jatl][2], masses[katl][2], masses[latl][2])
                 )
             #outfile.write("\n")
             #outfile.write(
@@ -725,11 +744,14 @@ class Writer(object):
             #    + "; ai    aj      ak      al      funct   phi0    cp      mult\n"
             #)
             #for i in range(len(self.impropers)):
-            #    j = self.improper_labels[i]
+            #    iat, jat, kat, lat = self.impropers[i]
+            #    iatl = self.atom_labels[iat-1]; jatl = self.atom_labels[jat-1];
+            #    katl = self.atom_labels[kat-1]; latl = self.atom_labels[lat-1]
             #    outfile.write(
-            #        "{:>6} {:>6} {:>6} {:>6} {:>6}\n"
+            #        "{:>6} {:>6} {:>6} {:>6} {:>6} ; {:>6} - {:>6} - {:>6} - {:>6}\n"
             #        .format(self.impropers[i][0], self.impropers[i][1],
-            #                self.impropers[i][2], self.impropers[i][3], 2)
+            #                self.impropers[i][2], self.impropers[i][3], 2,
+            #                masses[iatl][2], masses[jatl][2], masses[katl][2], masses[latl][2])
             #    )
 
             print "Coords written to   " + gro_filename
